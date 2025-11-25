@@ -64,34 +64,126 @@ async function startServer() {
 
         // AUTH ROUTES
 
+        // Register
+        app.post('/auth/register', async (req, res) => {
+            try {
+                const { name, email, password } = req.body;
+
+                // Check if user exists
+                const existingUser = await User.findOne({ where: { email } });
+                if (existingUser) {
+                    return res.status(400).json({ error: 'Cet email est déjà utilisé' });
+                }
+
+                const passwordHash = await bcrypt.hash(password, 10);
+                const user = await User.create({
+                    name,
+                    email,
+                    passwordHash
+                });
+
+                const token = jwt.sign(
+                    { id: user.id, email: user.email, role: 'user' },
+                    JWT_SECRET,
+                    { expiresIn: '24h' }
+                );
+
+                res.status(201).json({
+                    token,
+                    user: {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        role: 'user'
+                    }
+                });
+            } catch (error) {
+                console.error('❌ Erreur register:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
         // Login
         app.post('/auth/login', async (req, res) => {
             try {
                 const { username, password } = req.body;
                 console.log('🔐 Tentative de connexion:', username);
 
+                // 1. Try Admin login
                 const admin = await Admin.findOne({ where: { username } });
-                if (!admin) {
-                    console.log('❌ Admin non trouvé:', username);
-                    return res.status(401).json({ error: 'Identifiants invalides' });
+                if (admin) {
+                    const isValid = await bcrypt.compare(password, admin.passwordHash);
+                    if (isValid) {
+                        const token = jwt.sign(
+                            { id: admin.id, username: admin.username, role: 'admin' },
+                            JWT_SECRET,
+                            { expiresIn: '24h' }
+                        );
+                        console.log('✅ Connexion Admin réussie:', username);
+                        return res.json({
+                            token,
+                            user: {
+                                id: admin.id,
+                                name: admin.username,
+                                role: 'admin'
+                            }
+                        });
+                    }
                 }
 
-                const isValid = await bcrypt.compare(password, admin.passwordHash);
-                if (!isValid) {
-                    console.log('❌ Mot de passe incorrect pour:', username);
-                    return res.status(401).json({ error: 'Identifiants invalides' });
+                // 2. Try User login (username treated as email)
+                const user = await User.findOne({ where: { email: username } });
+                if (user) {
+                    const isValid = await bcrypt.compare(password, user.passwordHash);
+                    if (isValid) {
+                        const token = jwt.sign(
+                            { id: user.id, email: user.email, role: 'user' },
+                            JWT_SECRET,
+                            { expiresIn: '24h' }
+                        );
+                        console.log('✅ Connexion User réussie:', username);
+                        return res.json({
+                            token,
+                            user: {
+                                id: user.id,
+                                name: user.name,
+                                email: user.email,
+                                role: 'user'
+                            }
+                        });
+                    }
                 }
 
-                const token = jwt.sign(
-                    { id: admin.id, username: admin.username },
-                    JWT_SECRET,
-                    { expiresIn: '24h' }
-                );
-
-                console.log('✅ Connexion réussie:', username);
-                res.json({ token, username: admin.username });
+                console.log('❌ Échec connexion:', username);
+                res.status(401).json({ error: 'Identifiants invalides' });
             } catch (error) {
                 console.error('❌ Erreur login:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        // Get current user profile
+        app.get('/auth/me', authenticateToken, async (req, res) => {
+            try {
+                if (req.user.role === 'admin') {
+                    const admin = await Admin.findByPk(req.user.id);
+                    return res.json({
+                        id: admin.id,
+                        name: admin.username,
+                        role: 'admin'
+                    });
+                } else {
+                    const user = await User.findByPk(req.user.id);
+                    if (!user) return res.status(404).json({ error: 'User not found' });
+                    return res.json({
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        role: 'user',
+                        preferences: user.preferences
+                    });
+                }
+            } catch (error) {
                 res.status(500).json({ error: error.message });
             }
         });
