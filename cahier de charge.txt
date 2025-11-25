@@ -1,0 +1,148 @@
+Parfait, je comprends les ajustements. C'est une excellente clarification qui rend le projet encore plus cohérent. Le fait que tout soit du texte à la base simplifie grandement la gestion de contenu, et l'ajout de la lecture audio (Text-to-Speech) est une fonctionnalité moderne et très appréciée pour l'accessibilité.
+
+La contrainte des 6 Go de RAM est un facteur très important. Nous allons choisir une stack technique et un environnement de développement spécifiquement pour être légers et performants.
+
+Voici le cahier des charges complet et révisé.
+
+Cahier des Charges Révisé - Application de Contenu Chrétien
+1. Objectif du Projet
+
+Créer une application mobile native pour iOS et Android qui offre une expérience de lecture et d'écoute immersive de contenus chrétiens. L'application se base sur trois formats de texte de longueurs variables : Méditations (courtes), Livrets (moyennes) et Livres (longs). Une fonctionnalité centrale est la lecture audio de n'importe quel texte via une synthèse vocale (Text-to-Speech) intégrée. Le projet inclut un back-office privé pour la gestion des contenus et des fonctionnalités de monétisation (dons et vente de livrets/livres).
+
+2. Périmètre Fonctionnel
+
+Accueil et Navigation
+
+Tableau de Bord : Présentation des nouveautés (dernière méditation, livret du mois, etc.) et des collections thématiques.
+
+Navigation Claire : Barre de navigation avec : Accueil, Bibliothèque (pour tout parcourir), Recherche, Mon Compte.
+
+Bibliothèque & Accès aux Contenus
+
+Vue unifiée : Un seul écran "Bibliothèque" présentant tous les contenus, avec des onglets ou des filtres pour trier par format : Méditations, Livrets, Livres.
+
+Chaque item de la liste affiche sa couverture, son titre et éventuellement une étiquette ("Nouveau", "Premium").
+
+Écran de Lecture (Le cœur de l'application)
+
+Affichage du Texte : Interface de lecture minimaliste et sans distraction.
+
+Personnalisation Visuelle :
+
+Réglage de la taille de la police.
+
+Choix de 3 polices : une Serif (ex: Garamond), une Sans-Serif (ex: Roboto), une pour dyslexiques (ex: OpenDyslexic).
+
+Modes d'affichage : Clair, Sépia, Sombre.
+
+Lecteur Audio (Text-to-Speech) :
+
+Contrôles flottants ou ancrés en bas : Boutons Play / Pause / Stop.
+
+Progression : La phrase ou le paragraphe en cours de lecture doit être visuellement mis en surbrillance.
+
+Voix native : Utilisation du moteur de synthèse vocale du système d'exploitation (la voix de Siri sur iOS, la voix de Google sur Android) pour un rendu naturel et sans surcoût.
+
+Contrôle de la vitesse de lecture (0.75x, 1x, 1.5x, 2x).
+
+Module de Vente (Librairie Intégrée)
+
+Les Livrets et les Livres peuvent être marqués comme "payants".
+
+Aperçu Gratuit : Affichage du premier chapitre ou d'un extrait pour inciter à l'achat.
+
+Achat In-App : Un bouton "Acheter pour X.XX €" déclenche le processus de paiement natif et sécurisé d'Apple (StoreKit) ou de Google (Play Billing).
+
+Une fois acheté, le contenu est débloqué de manière permanente pour l'utilisateur dans son compte.
+
+Module de Dons
+
+Page dédiée expliquant le projet, avec des options de dons sous forme d'achats In-App ("Soutenir le projet : 5€").
+
+Fonctionnalités Transverses
+
+Recherche Globale : Moteur de recherche performant dans le titre et le contenu de tous les textes.
+
+Gestion de Compte Utilisateur :
+
+Authentification (email/mdp, Google/Apple).
+
+Section "Mes Achats" : Accès rapide à tous les livrets et livres achetés.
+
+Section "Mes Favoris" : Possibilité de marquer n'importe quel contenu pour le retrouver facilement.
+
+Mode Hors-Ligne : Les contenus achetés et les favoris sont automatiquement téléchargés pour un accès sans connexion internet.
+
+Gestion de Contenu Unifiée :
+
+Un seul type de contenu "Publication" avec les champs suivants :
+
+Titre (Texte)
+
+Contenu Principal (Éditeur de texte riche / Markdown)
+
+Image de Couverture (Upload)
+
+Type (Menu déroulant : Méditation, Livret, Livre)
+
+Est Payant ? (Booléen : Oui/Non)
+
+ID Produit Store (Texte : identifiant pour l'achat In-App, ex: "livret_psaumes_01")
+
+Extrait (Champ de texte pour l'aperçu gratuit)
+
+Simplicité Maximale : Plus besoin de gérer des fichiers audio. Tout est du texte.
+
+Autres modules : Tableau de bord des statistiques, gestion des utilisateurs, envoi de notifications push (identiques à la version précédente).
+
+3. Spécifications Techniques (Optimisées pour 6 Go de RAM)
+
+Cette stack est choisie pour sa légèreté, sa performance et sa gratuité (pour les outils de développement).
+
+Environnement de Développement OPTIMISÉ
+
+Éditeur de Code : Visual Studio Code (VS Code). C'est de loin le meilleur choix. Il est extrêmement léger, rapide, et dispose d'extensions Flutter exceptionnelles qui le transforment en un IDE puissant sans consommer toute votre RAM.
+
+Débogage : UTILISATION D'UN TÉLÉPHONE PHYSIQUE. C'est le point le plus crucial pour vous. Les émulateurs Android et iOS sont de très gros consommateurs de RAM. En branchant votre propre téléphone (Android ou iPhone) en USB, vous exécutez l'application directement dessus. Cela libère plusieurs Go de RAM sur votre machine.
+
+Terminal : Utilisez le terminal intégré de VS Code pour lancer vos commandes. Il est très léger.
+
+Stack Technique Recommandée
+
+Application Mobile (Frontend) :
+
+Framework : Flutter. C'est le choix idéal. Il est performant et son outil de "Hot Reload" vous permet de voir vos changements instantanément sans recompiler toute l'application, ce qui est moins gourmand en ressources.
+
+Langage : Dart.
+
+Package Clé pour la Lecture Audio : flutter_tts. C'est une bibliothèque très populaire qui se connecte directement aux API natives de Text-to-Speech d'iOS et d'Android. Elle est simple à utiliser et très efficace.
+
+Back-Office (Backend & API) :
+
+Solution : Strapi (CMS Headless). Il reste le meilleur choix.
+
+Installation : Installez-le nativement sur votre machine avec npm ou yarn, n'utilisez pas Docker pour le développement, car Docker ajoute une couche de virtualisation qui consomme de la RAM supplémentaire.
+
+Langage : JavaScript/TypeScript (via Node.js).
+
+Base de Données :
+
+Système : PostgreSQL.
+
+Installation : Installez-le directement sur votre système d'exploitation (via Homebrew sur Mac, ou apt sur Linux/WSL). Évitez Docker ici aussi.
+
+Gestion des Paiements In-App :
+
+Service Tiers : RevenueCat. Leur SDK Flutter est léger et la logique complexe est gérée sur leurs serveurs, ce qui n'impacte pas votre environnement de développement.
+
+4. Architecture Générale
+
+L'architecture est maintenant plus simple :
+
+L'Admin utilise le Back-Office Strapi pour écrire et publier du contenu texte.
+
+L'Application Flutter récupère ce texte via l'API de Strapi.
+
+Quand l'utilisateur appuie sur "Play" dans l'application, le texte est envoyé au moteur Text-to-Speech natif du téléphone (via le package flutter_tts), qui le convertit en audio en temps réel. Aucun fichier audio n'est téléchargé ou stocké.
+
+Les achats sont gérés par RevenueCat, qui communique avec les serveurs d'Apple/Google pour valider les paiements et débloquer les contenus.
