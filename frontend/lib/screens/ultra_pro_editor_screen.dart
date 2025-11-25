@@ -399,6 +399,7 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
                 showSuperscript: true,
                 showUnderLineButton: true,
                 showUndo: true,
+                embedButtons: FlutterQuillEmbeds.toolbarButtons(),
               ),
             ),
           ),
@@ -407,15 +408,16 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(16),
-            child: quill.QuillEditor.basic(
+            child: quill.QuillEditor(
               controller: _controller,
               focusNode: _focusNode,
               scrollController: _scrollController,
-              configurations: const quill.QuillEditorConfigurations(
-                padding: EdgeInsets.all(16),
+              configurations: quill.QuillEditorConfigurations(
+                padding: const EdgeInsets.all(16),
                 placeholder: 'Commencez à écrire votre contenu...',
                 autoFocus: false,
                 expands: false,
+                embedBuilders: FlutterQuillEmbeds.editorBuilders(),
               ),
             ),
           ),
@@ -447,13 +449,14 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
     return Container(
       color: Colors.grey[50],
       padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 40),
-      child: quill.QuillEditor.basic(
+      child: quill.QuillEditor(
         controller: _controller,
         focusNode: _focusNode,
         scrollController: _scrollController,
         configurations: quill.QuillEditorConfigurations(
           padding: const EdgeInsets.all(24),
           placeholder: 'Écrivez en toute tranquillité...',
+          embedBuilders: FlutterQuillEmbeds.editorBuilders(),
           customStyles: quill.DefaultStyles(
             paragraph: quill.DefaultTextBlockStyle(
               GoogleFonts.lora(fontSize: 18, height: 1.8),
@@ -528,12 +531,14 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
                   const SizedBox(height: 24),
                   
                   // Content preview
-                  quill.QuillEditor.basic(
+                  quill.QuillEditor(
                     controller: _controller,
-                    configurations: const quill.QuillEditorConfigurations(
+                    configurations: quill.QuillEditorConfigurations(
                       padding: EdgeInsets.zero,
-                      readOnly: true,
+                      embedBuilders: FlutterQuillEmbeds.editorBuilders(),
                     ),
+                    focusNode: FocusNode(),
+                    scrollController: ScrollController(),
                   ),
                 ],
               ),
@@ -548,13 +553,14 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
     return Stack(
       children: [
         // Editor
-        quill.QuillEditor.basic(
+        quill.QuillEditor(
           controller: _controller,
           focusNode: _focusNode,
           scrollController: _scrollController,
-          configurations: const quill.QuillEditorConfigurations(
-            padding: EdgeInsets.symmetric(horizontal: 120, vertical: 60),
+          configurations: quill.QuillEditorConfigurations(
+            padding: const EdgeInsets.symmetric(horizontal: 120, vertical: 60),
             placeholder: 'Écrivez en plein écran...',
+            embedBuilders: FlutterQuillEmbeds.editorBuilders(),
           ),
         ),
         

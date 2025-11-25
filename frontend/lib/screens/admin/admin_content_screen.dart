@@ -5,7 +5,7 @@ import '../../models/publication.dart';
 import '../../services/auth_service.dart';
 import '../../services/publication_service.dart';
 import '../../theme/app_theme.dart';
-import '../publication_editor_screen.dart';
+import '../ultra_pro_editor_screen.dart';
 
 class AdminContentScreen extends StatefulWidget {
   const AdminContentScreen({super.key});
@@ -132,7 +132,7 @@ class _AdminContentScreenState extends State<AdminContentScreen> {
                 onPressed: () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const PublicationEditorScreen()),
+                    MaterialPageRoute(builder: (context) => const UltraProEditorScreen()),
                   );
                   _loadData();
                 },
@@ -190,7 +190,17 @@ class _AdminContentScreenState extends State<AdminContentScreen> {
                                   await Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => PublicationEditorScreen(publication: pub),
+                                      builder: (context) => UltraProEditorScreen(
+                                        publicationId: pub.id.toString(),
+                                        existingData: {
+                                          'title': pub.titre,
+                                          'content': pub.contenuPrincipal,
+                                          'excerpt': pub.extrait,
+                                          'type': pub.type,
+                                          'isPaid': pub.estPayant,
+                                          'coverImage': pub.imageUrl,
+                                        },
+                                      ),
                                     ),
                                   );
                                   _loadData();
