@@ -27,6 +27,14 @@ const User = sequelize.define('User', {
             fontFamily: 'Lato',
             autoPlay: false
         }
+    },
+    isPremium: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    subscriptionEndsAt: {
+        type: DataTypes.DATE,
+        allowNull: true
     }
 });
 
