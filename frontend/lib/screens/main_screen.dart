@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'modern_dashboard_screen.dart';
 import 'library_screen.dart';
 import 'search_screen.dart';
-import 'account_screen.dart';
+import 'profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
     ModernDashboardScreen(),
     LibraryScreen(),
     SearchScreen(),
-    AccountScreen(),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {

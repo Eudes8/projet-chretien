@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../models/publication.dart';
 import '../services/publication_service.dart';
 import '../theme/app_theme.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
+import '../theme/premium_components.dart';
 import 'reading_screen.dart';
 
 class ModernDashboardScreen extends StatefulWidget {
@@ -131,8 +134,10 @@ class _ModernDashboardScreenState extends State<ModernDashboardScreen> with Sing
   }
 
   Widget _buildHeroSection() {
+    final user = Provider.of<AuthService>(context).currentUser;
+    final firstName = user != null ? user['name'].toString().split(' ')[0] : 'Bienvenue';
+
     return Container(
-      height: 280,
       decoration: BoxDecoration(
         gradient: AppTheme.primaryGradient,
         borderRadius: const BorderRadius.only(
@@ -176,30 +181,94 @@ class _ModernDashboardScreenState extends State<ModernDashboardScreen> with Sing
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.auto_stories_rounded,
-                    color: AppTheme.primaryGold,
-                    size: 48,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Bonjour, $firstName',
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'Que souhaitez-vous lire aujourd\'hui ?',
+                            style: GoogleFonts.lato(
+                              fontSize: 14,
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (user != null && user['avatar'] != null)
+                        CircleAvatar(
+                          backgroundImage: NetworkImage(user['avatar']),
+                          radius: 24,
+                        )
+                      else
+                        CircleAvatar(
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                          radius: 24,
+                          child: Text(
+                            firstName[0].toUpperCase(),
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: AppTheme.spacingM),
-                  Text(
-                    'Bienvenue',
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      height: 1.2,
+                  const SizedBox(height: AppTheme.spacingL),
+                  
+                  // Quote of the Day Card
+                  PremiumCard(
+                    color: Colors.white.withOpacity(0.15),
+                    hasShadow: false,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.format_quote, color: AppTheme.primaryGold, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              'VERSET DU JOUR',
+                              style: GoogleFonts.lato(
+                                color: AppTheme.primaryGold,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '"Car je connais les projets que j\'ai formés sur vous, dit l\'Éternel, projets de paix et non de malheur..."',
+                          style: GoogleFonts.playfairDisplay(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            'Jérémie 29:11',
+                            style: GoogleFonts.lato(
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: AppTheme.spacingS),
-                  Text(
-                    'Découvrez des méditations, livrets et livres\npour nourrir votre foi',
-                    style: GoogleFonts.lato(
-                      fontSize: 16,
-                      color: Colors.white.withOpacity(0.9),
-                      height: 1.5,
-                    ),
-                  ),
+                  
                   const SizedBox(height: AppTheme.spacingL),
                   _buildSearchBar(),
                 ],
