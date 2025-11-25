@@ -8,6 +8,10 @@ frontend/.pub-cache/
 frontend/.pub/
 frontend/pubspec.lock
 
+# APK files
+*.apk
+*.aab
+
 # Backend Node.js
 backend-native/node_modules/
 backend-native/database.sqlite

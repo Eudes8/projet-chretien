@@ -5,7 +5,7 @@ import '../models/publication.dart';
 
 class PublicationService {
   // ... (baseUrl)
-  final String baseUrl = 'http://localhost:3000';
+  final String baseUrl = 'http://192.168.1.8:3000';
 
   // ... (getPublications)
   Future<List<Publication>> getPublications() async {

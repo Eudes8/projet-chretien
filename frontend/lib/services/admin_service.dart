@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AdminService {
-  final String baseUrl = 'http://localhost:3000';
+  final String baseUrl = 'http://192.168.1.8:3000';
 
   Future<Map<String, dynamic>> getStats(Map<String, String> headers) async {
     final response = await http.get(

@@ -10,7 +10,7 @@ class AuthService extends ChangeNotifier {
   String? get username => _username;
   bool get isAuthenticated => _token != null;
 
-  final String baseUrl = 'http://localhost:3000';
+  final String baseUrl = 'http://192.168.1.8:3000';
 
   Future<bool> login(String username, String password) async {
     try {
