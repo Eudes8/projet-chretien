@@ -14,6 +14,7 @@ const { authenticateToken, JWT_SECRET } = require('./middleware/auth');
 
 const app = express();
 const PORT = 3000;
+const BASE_URL = process.env.BASE_URL || 'http://192.168.1.8:3000';
 
 // Middleware
 app.use(cors());
@@ -159,7 +160,7 @@ async function startServer() {
 
                 // Add image URL if file was uploaded
                 if (req.file) {
-                    publicationData.coverImage = `http://localhost:3000/uploads/${req.file.filename}`;
+                    publicationData.coverImage = `${BASE_URL}/uploads/${req.file.filename}`;
                 }
 
                 const publication = await Publication.create(publicationData);
@@ -196,7 +197,7 @@ async function startServer() {
 
                 // Add image URL if file was uploaded, otherwise keep existing
                 if (req.file) {
-                    updateData.coverImage = `http://localhost:3000/uploads/${req.file.filename}`;
+                    updateData.coverImage = `${BASE_URL}/uploads/${req.file.filename}`;
                 } else if (rawData.imageUrl) {
                     updateData.coverImage = rawData.imageUrl;
                 }
