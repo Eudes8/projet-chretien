@@ -114,40 +114,79 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
       final headers = authService.getAuthHeaders();
-      headers['Content-Type'] = 'application/json';
-
+      
       final content = jsonEncode(_controller.document.toDelta().toJson());
       
-      final body = jsonEncode({
+      // Prepare data
+      final Map<String, dynamic> data = {
         'titre': _titleController.text,
         'contenuPrincipal': content,
         'extrait': _excerptController.text,
         'type': _selectedType,
-        'estPayant': _isPaid,
+        'estPayant': _isPaid.toString(),
         'imageUrl': _existingCoverImageUrl,
-      });
+      };
 
-      final url = widget.publicationId == null
-          ? 'http://192.168.1.8:3000/publications'
-          : 'http://192.168.1.8:3000/publications/${widget.publicationId}';
-
-      final response = widget.publicationId == null
-          ? await http.post(Uri.parse(url), headers: headers, body: body)
-          : await http.put(Uri.parse(url), headers: headers, body: body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        setState(() => _lastSaved = DateTime.now());
-        if (showMessage && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Publication sauvegardée'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
+      // Use PublicationService logic (reimplemented here for multipart support if needed, 
+      // but better to use the service if possible. For now, let's fix the URL issue)
+      
+      // We'll use the Dio instance from AuthService to ensure consistent BaseURL
+      // But since we can't access it easily, let's use the relative path approach 
+      // assuming we had a proper service. 
+      // Let's rewrite this to use http but with the correct URL from a constant or service.
+      
+      // BETTER: Use PublicationService
+      final PublicationService service = PublicationService();
+      
+      if (widget.publicationId == null) {
+        // Create
+        // Note: PublicationService.createPublication handles multipart if file is present
+        // Here we might need to handle file upload differently if _coverImage is set
+        // For now, let's keep it simple and fix the URL
+        
+        // Actually, let's just fix the URL to be dynamic based on AuthService or a constant
+        // But since we don't have a global constant file easily accessible, let's use the relative path
+        // and a proper HTTP client.
+        
+        // Let's use the same URL as AuthService
+        const String baseUrl = 'http://192.168.1.8:3000'; // TODO: Move to config
+        
+        var request = http.MultipartRequest(
+          widget.publicationId == null ? 'POST' : 'PUT',
+          Uri.parse('$baseUrl/publications${widget.publicationId == null ? '' : '/${widget.publicationId}'}'),
+        );
+        
+        request.headers.addAll(headers);
+        request.fields['titre'] = _titleController.text;
+        request.fields['contenuPrincipal'] = content;
+        request.fields['extrait'] = _excerptController.text;
+        request.fields['type'] = _selectedType;
+        request.fields['estPayant'] = _isPaid.toString();
+        if (_existingCoverImageUrl != null) {
+          request.fields['imageUrl'] = _existingCoverImageUrl!;
         }
-      } else {
-        throw Exception('Erreur serveur: ${response.statusCode}');
+        
+        if (_coverImage != null) {
+          request.files.add(await http.MultipartFile.fromPath('coverImage', _coverImage!.path));
+        }
+
+        final streamedResponse = await request.send();
+        final response = await http.Response.fromStream(streamedResponse);
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          setState(() => _lastSaved = DateTime.now());
+          if (showMessage && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('✅ Publication sauvegardée'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
+        } else {
+          throw Exception('Erreur serveur: ${response.statusCode} - ${response.body}');
+        }
       }
     } catch (e) {
       if (showMessage && mounted) {

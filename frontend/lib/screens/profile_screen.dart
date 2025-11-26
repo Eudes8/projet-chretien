@@ -5,7 +5,7 @@ import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'subscription_screen.dart';
-import 'admin/admin_screen.dart';
+import 'admin_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
