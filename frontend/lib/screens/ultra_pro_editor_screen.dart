@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
-import '../services/publication_service.dart';
 
 class UltraProEditorScreen extends StatefulWidget {
   final String? publicationId;
@@ -52,6 +49,9 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
   int _wordCount = 0;
   int _charCount = 0;
   
+  // BACKEND URL (Production)
+  final String baseUrl = 'https://projet-chretien.onrender.com';
+
   @override
   void initState() {
     super.initState();
@@ -68,7 +68,6 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
       _isPaid = widget.existingData!['isPaid'] ?? false;
       _existingCoverImageUrl = widget.existingData!['coverImage'];
       
-      // Load Quill content
       if (widget.existingData!['content'] != null) {
         try {
           final doc = quill.Document.fromJson(
@@ -76,7 +75,6 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
           );
           _controller.document = doc;
         } catch (e) {
-          // If not JSON, treat as plain text
           _controller.document = quill.Document()
             ..insert(0, widget.existingData!['content']);
         }
@@ -118,76 +116,40 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
       
       final content = jsonEncode(_controller.document.toDelta().toJson());
       
-      // Prepare data
-      final Map<String, dynamic> data = {
-        'titre': _titleController.text,
-        'contenuPrincipal': content,
-        'extrait': _excerptController.text,
-        'type': _selectedType,
-        'estPayant': _isPaid.toString(),
-        'imageUrl': _existingCoverImageUrl,
-      };
-
-      // Use PublicationService logic (reimplemented here for multipart support if needed, 
-      // but better to use the service if possible. For now, let's fix the URL issue)
+      var request = http.MultipartRequest(
+        widget.publicationId == null ? 'POST' : 'PUT',
+        Uri.parse('$baseUrl/publications${widget.publicationId == null ? '' : '/${widget.publicationId}'}'),
+      );
       
-      // We'll use the Dio instance from AuthService to ensure consistent BaseURL
-      // But since we can't access it easily, let's use the relative path approach 
-      // assuming we had a proper service. 
-      // Let's rewrite this to use http but with the correct URL from a constant or service.
+      request.headers.addAll(headers);
+      request.fields['titre'] = _titleController.text;
+      request.fields['contenuPrincipal'] = content;
+      request.fields['extrait'] = _excerptController.text;
+      request.fields['type'] = _selectedType;
+      request.fields['estPayant'] = _isPaid.toString();
+      if (_existingCoverImageUrl != null) {
+        request.fields['imageUrl'] = _existingCoverImageUrl!;
+      }
       
-      // BETTER: Use PublicationService
-      final PublicationService service = PublicationService();
-      
-      if (widget.publicationId == null) {
-        // Create
-        // Note: PublicationService.createPublication handles multipart if file is present
-        // Here we might need to handle file upload differently if _coverImage is set
-        // For now, let's keep it simple and fix the URL
-        
-        // Actually, let's just fix the URL to be dynamic based on AuthService or a constant
-        // But since we don't have a global constant file easily accessible, let's use the relative path
-        // and a proper HTTP client.
-        
-        // Let's use the same URL as AuthService
-        const String baseUrl = 'http://192.168.1.8:3000'; // TODO: Move to config
-        
-        var request = http.MultipartRequest(
-          widget.publicationId == null ? 'POST' : 'PUT',
-          Uri.parse('$baseUrl/publications${widget.publicationId == null ? '' : '/${widget.publicationId}'}'),
-        );
-        
-        request.headers.addAll(headers);
-        request.fields['titre'] = _titleController.text;
-        request.fields['contenuPrincipal'] = content;
-        request.fields['extrait'] = _excerptController.text;
-        request.fields['type'] = _selectedType;
-        request.fields['estPayant'] = _isPaid.toString();
-        if (_existingCoverImageUrl != null) {
-          request.fields['imageUrl'] = _existingCoverImageUrl!;
-        }
-        
-        if (_coverImage != null) {
-          request.files.add(await http.MultipartFile.fromPath('coverImage', _coverImage!.path));
-        }
+      if (_coverImage != null) {
+        request.files.add(await http.MultipartFile.fromPath('coverImage', _coverImage!.path));
+      }
 
-        final streamedResponse = await request.send();
-        final response = await http.Response.fromStream(streamedResponse);
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
 
-        if (response.statusCode == 200 || response.statusCode == 201) {
-          setState(() => _lastSaved = DateTime.now());
-          if (showMessage && mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('✅ Publication sauvegardée'),
-                backgroundColor: Colors.green,
-                duration: Duration(seconds: 2),
-              ),
-            );
-          }
-        } else {
-          throw Exception('Erreur serveur: ${response.statusCode} - ${response.body}');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        setState(() => _lastSaved = DateTime.now());
+        if (showMessage && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Publication sauvegardée'),
+              backgroundColor: Colors.green,
+            ),
+          );
         }
+      } else {
+        throw Exception('Erreur serveur: ${response.statusCode}');
       }
     } catch (e) {
       if (showMessage && mounted) {
@@ -211,374 +173,86 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
     }
   }
 
-  void _toggleFullScreen() {
-    setState(() => _isFullScreen = !_isFullScreen);
-  }
-
-  void _toggleFocusMode() {
-    setState(() => _isFocusMode = !_isFocusMode);
-  }
-
-  void _togglePreview() {
-    setState(() => _showPreview = !_showPreview);
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (_isFullScreen) {
-      return Scaffold(
-        body: _buildFullScreenEditor(),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.publicationId == null ? 'Nouvelle Publication' : 'Éditer Publication',
+          widget.publicationId == null ? 'Nouvelle Publication' : 'Éditer',
           style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold),
         ),
         actions: [
-          // Auto-save indicator
-          if (_autoSaveEnabled)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Center(
-                child: Row(
-                  children: [
-                    Icon(
-                      _isSaving ? Icons.sync : Icons.check_circle,
-                      color: _isSaving ? Colors.orange : Colors.green,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      _lastSaved == null
-                          ? 'Non sauvegardé'
-                          : 'Sauvegardé ${_formatTimeSince(_lastSaved!)}',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          
-          // View mode toggles
-          IconButton(
-            icon: Icon(_isFocusMode ? Icons.visibility : Icons.visibility_off),
-            tooltip: 'Mode Focus',
-            onPressed: _toggleFocusMode,
-          ),
-          IconButton(
-            icon: Icon(_showPreview ? Icons.edit : Icons.preview),
-            tooltip: 'Aperçu',
-            onPressed: _togglePreview,
-          ),
-          IconButton(
-            icon: const Icon(Icons.fullscreen),
-            tooltip: 'Plein écran',
-            onPressed: _toggleFullScreen,
-          ),
-          
-          // Save button
           IconButton(
             icon: const Icon(Icons.save),
-            tooltip: 'Sauvegarder',
             onPressed: () => _savePublication(),
           ),
         ],
       ),
-      body: _buildEditorBody(),
-    );
-  }
-
-  Widget _buildEditorBody() {
-    if (_isFocusMode) {
-      return _buildFocusModeEditor();
-    }
-
-    return Row(
-      children: [
-        // Main editor area
-        Expanded(
-          flex: _showPreview ? 1 : 2,
-          child: _buildMainEditor(),
-        ),
-        
-        // Preview panel
-        if (_showPreview)
-          Expanded(
-            flex: 1,
-            child: _buildPreviewPanel(),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildMainEditor() {
-    return Column(
-      children: [
-        // Metadata section
-        if (!_isFocusMode)
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-            ),
-            child: Column(
-              children: [
-                // Title
-                TextField(
-                  controller: _titleController,
-                  style: GoogleFonts.playfairDisplay(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  decoration: const InputDecoration(
-                    hintText: 'Titre de la publication...',
-                    border: InputBorder.none,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                
-                // Excerpt
-                TextField(
-                  controller: _excerptController,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    hintText: 'Extrait (résumé court)...',
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                
-                // Type and options
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: _selectedType,
-                        decoration: const InputDecoration(
-                          labelText: 'Type',
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                        ),
-                        items: ['Méditation', 'Livret', 'Livre']
-                            .map((type) => DropdownMenuItem(
-                                  value: type,
-                                  child: Text(type),
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => _selectedType = value);
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: SwitchListTile(
-                        title: const Text('Payant'),
-                        value: _isPaid,
-                        onChanged: (value) => setState(() => _isPaid = value),
-                        dense: true,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton.icon(
-                      onPressed: _pickCoverImage,
-                      icon: const Icon(Icons.image),
-                      label: Text(_coverImage != null || _existingCoverImageUrl != null
-                          ? 'Changer image'
-                          : 'Ajouter image'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        
-        // Quill toolbar
-        if (!_isFocusMode)
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-            ),
-            child: quill.QuillToolbar.simple(
-              controller: _controller,
-            ),
-          ),
-        
-        // Editor
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            child: quill.QuillEditor(
-              controller: _controller,
-              focusNode: _focusNode,
-              scrollController: _scrollController,
-            ),
-          ),
-        ),
-        
-        // Status bar
-        if (!_isFocusMode)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              border: Border(top: BorderSide(color: Colors.grey[300]!)),
-            ),
-            child: Row(
-              children: [
-                Text('Mots: $_wordCount'),
-                const SizedBox(width: 24),
-                Text('Caractères: $_charCount'),
-                const Spacer(),
-                Text('Temps de lecture: ${(_wordCount / 200).ceil()} min'),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildFocusModeEditor() {
-    return Container(
-      color: Colors.grey[50],
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 40),
-      child: quill.QuillEditor(
-        controller: _controller,
-        focusNode: _focusNode,
-        scrollController: _scrollController,
-      ),
-    );
-  }
-
-  Widget _buildPreviewPanel() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(left: BorderSide(color: Colors.grey[300]!)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
+          // Metadata Form
+          if (!_isFocusMode)
+            Container(
+              padding: const EdgeInsets.all(16),
               color: Colors.grey[100],
-              border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.preview, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  'Aperçu',
-                  style: GoogleFonts.lato(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title
-                  Text(
-                    _titleController.text.isEmpty
-                        ? 'Titre de la publication'
-                        : _titleController.text,
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+                  TextField(
+                    controller: _titleController,
+                    style: GoogleFonts.playfairDisplay(fontSize: 24, fontWeight: FontWeight.bold),
+                    decoration: const InputDecoration(
+                      hintText: 'Titre...',
+                      border: InputBorder.none,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  
-                  // Excerpt
-                  if (_excerptController.text.isNotEmpty)
-                    Text(
-                      _excerptController.text,
-                      style: GoogleFonts.lato(
-                        fontSize: 16,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey[700],
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedType,
+                          items: ['Méditation', 'Livret', 'Livre']
+                              .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                              .toList(),
+                          onChanged: (v) => setState(() => _selectedType = v!),
+                          decoration: const InputDecoration(isDense: true, border: OutlineInputBorder()),
+                        ),
                       ),
-                    ),
-                  const SizedBox(height: 24),
-                  
-                  // Content preview
-                  quill.QuillEditor(
-                    controller: _controller,
-                    focusNode: FocusNode(canRequestFocus: false),
-                    scrollController: ScrollController(),
+                      const SizedBox(width: 8),
+                      Switch(value: _isPaid, onChanged: (v) => setState(() => _isPaid = v)),
+                      const Text('Payant'),
+                    ],
                   ),
                 ],
+              ),
+            ),
+
+          // Toolbar (v9 API)
+          quill.QuillToolbar.basic(
+            controller: _controller,
+            showAlignmentButtons: true,
+            showBoldButton: true,
+            showUnderLineButton: true,
+            showStrikeThrough: true,
+            showColorButton: true,
+            showBackgroundColorButton: true,
+            showListBullets: true,
+            showListNumbers: true,
+          ),
+
+          // Editor (v9 API)
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              child: quill.QuillEditor.basic(
+                controller: _controller,
+                readOnly: false,
               ),
             ),
           ),
         ],
       ),
     );
-  }
-
-  Widget _buildFullScreenEditor() {
-    return Stack(
-      children: [
-        // Editor
-        quill.QuillEditor(
-          controller: _controller,
-          focusNode: _focusNode,
-          scrollController: _scrollController,
-        ),
-        
-        // Floating toolbar
-        Positioned(
-          top: 16,
-          right: 16,
-          child: Material(
-            elevation: 4,
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.fullscreen_exit),
-                    onPressed: _toggleFullScreen,
-                    tooltip: 'Quitter plein écran',
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.save),
-                    onPressed: () => _savePublication(),
-                    tooltip: 'Sauvegarder',
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _formatTimeSince(DateTime time) {
-    final diff = DateTime.now().difference(time);
-    if (diff.inSeconds < 60) return 'à l\'instant';
-    if (diff.inMinutes < 60) return 'il y a ${diff.inMinutes} min';
-    if (diff.inHours < 24) return 'il y a ${diff.inHours}h';
-    return 'il y a ${diff.inDays}j';
   }
 
   @override

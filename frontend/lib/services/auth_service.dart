@@ -13,7 +13,7 @@ class AuthService extends ChangeNotifier {
   bool get isAdmin => _currentUser?['role'] == 'admin';
   bool get isLoading => _isLoading;
 
-  final String baseUrl = 'http://192.168.1.8:3000';
+  final String baseUrl = 'https://projet-chretien.onrender.com';
 
   Future<bool> login(String username, String password) async {
     _setLoading(true);

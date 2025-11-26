@@ -5,7 +5,7 @@ import '../models/publication.dart';
 
 class PublicationService {
   // ... (baseUrl)
-  final String baseUrl = 'http://192.168.1.8:3000';
+  final String baseUrl = 'https://projet-chretien.onrender.com';
 
   // ... (getPublications)
   Future<List<Publication>> getPublications() async {
