@@ -246,12 +246,15 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
           Expanded(
             child: Container(
               padding: const EdgeInsets.all(16),
-              child: quill.QuillEditor.basic(
-                configurations: quill.QuillEditorConfigurations(
-                  controller: _controller,
-                  sharedConfigurations: const quill.QuillSharedConfigurations(
-                    locale: Locale('fr'),
-                  ),
+              child: quill.QuillEditor(
+                controller: _controller,
+                scrollController: _scrollController,
+                focusNode: _focusNode,
+                configurations: const quill.QuillEditorConfigurations(
+                  padding: EdgeInsets.all(16),
+                  autoFocus: true,
+                  expands: false,
+                  scrollable: true,
                 ),
               ),
             ),
