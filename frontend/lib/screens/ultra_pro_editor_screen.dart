@@ -228,16 +228,18 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
             ),
 
           // Toolbar (v9 API)
-          quill.QuillToolbar.basic(
-            controller: _controller,
-            showAlignmentButtons: true,
-            showBoldButton: true,
-            showUnderLineButton: true,
-            showStrikeThrough: true,
-            showColorButton: true,
-            showBackgroundColorButton: true,
-            showListBullets: true,
-            showListNumbers: true,
+          quill.QuillToolbar.simple(
+            configurations: quill.QuillSimpleToolbarConfigurations(
+              controller: _controller,
+              showAlignmentButtons: true,
+              showBoldButton: true,
+              showUnderLineButton: true,
+              showStrikeThrough: true,
+              showColorButton: true,
+              showBackgroundColorButton: true,
+              showListBullets: true,
+              showListNumbers: true,
+            ),
           ),
 
           // Editor (v9 API)
@@ -245,8 +247,13 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               child: quill.QuillEditor.basic(
-                controller: _controller,
-                readOnly: false,
+                configurations: quill.QuillEditorConfigurations(
+                  controller: _controller,
+                  readOnly: false,
+                  sharedConfigurations: const quill.QuillSharedConfigurations(
+                    locale: Locale('fr'),
+                  ),
+                ),
               ),
             ),
           ),

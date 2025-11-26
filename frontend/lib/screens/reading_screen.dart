@@ -300,7 +300,13 @@ class _ReadingScreenState extends State<ReadingScreen> {
         ),
       ),
       child: QuillEditor.basic(
-        controller: _quillController,
+        configurations: QuillEditorConfigurations(
+          controller: _quillController,
+          readOnly: true,
+          sharedConfigurations: const QuillSharedConfigurations(
+            locale: Locale('fr'),
+          ),
+        ),
       ),
     );
   }
