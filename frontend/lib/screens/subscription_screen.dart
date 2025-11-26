@@ -25,6 +25,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       final success = await _paymentService.subscribe(plan: _selectedPlan);
       
       if (success && mounted) {
+        // Update user profile to reflect premium status
+        await Provider.of<AuthService>(context, listen: false).fetchProfile();
+
         // Show success dialog
         showDialog(
           context: context,

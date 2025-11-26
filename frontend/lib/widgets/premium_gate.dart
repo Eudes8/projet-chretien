@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/premium_components.dart';
-import 'subscription_screen.dart';
+import '../screens/subscription_screen.dart';
 
 class PremiumGate extends StatelessWidget {
   final Widget child;

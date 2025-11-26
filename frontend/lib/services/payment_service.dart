@@ -5,13 +5,11 @@ import 'auth_service.dart';
 
 class PaymentService {
   final Dio _dio = Dio(BaseOptions(
-    baseURL: 'http://192.168.1.8:3000',
+    baseUrl: 'http://192.168.1.8:3000',
     connectTimeout: const Duration(seconds: 5),
     receiveTimeout: const Duration(seconds: 3),
   ));
   
-  final AuthService _authService = AuthService();
-
   Future<bool> subscribe({required String plan}) async {
     try {
       // Get token
@@ -32,8 +30,6 @@ class PaymentService {
       );
       
       if (response.statusCode == 200) {
-        // Update local user data
-        await _authService.fetchProfile();
         return true;
       }
       return false;

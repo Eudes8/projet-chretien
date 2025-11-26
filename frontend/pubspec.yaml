@@ -50,6 +50,8 @@ dependencies:
   path_provider: ^2.1.5
   share_plus: ^10.1.2
   url_launcher: ^6.3.2
+  dio: ^5.7.0
+  shared_preferences: ^2.3.3
 
 dependency_overrides:
   path_provider_foundation: ^2.4.0
