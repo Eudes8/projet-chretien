@@ -403,6 +403,132 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
         // Quill toolbar
         if (!_isFocusMode)
           Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+            ),
+            child: quill.QuillToolbar.simple(
+              controller: _controller,
+            ),
+          ),
+        
+        // Editor
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: quill.QuillEditor(
+              controller: _controller,
+              focusNode: _focusNode,
+              scrollController: _scrollController,
+            ),
+          ),
+        ),
+        
+        // Status bar
+        if (!_isFocusMode)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              border: Border(top: BorderSide(color: Colors.grey[300]!)),
+            ),
+            child: Row(
+              children: [
+                Text('Mots: $_wordCount'),
+                const SizedBox(width: 24),
+                Text('Caractères: $_charCount'),
+                const Spacer(),
+                Text('Temps de lecture: ${(_wordCount / 200).ceil()} min'),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildFocusModeEditor() {
+    return Container(
+      color: Colors.grey[50],
+      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 40),
+      child: quill.QuillEditor(
+        controller: _controller,
+        focusNode: _focusNode,
+        scrollController: _scrollController,
+      ),
+    );
+  }
+
+  Widget _buildPreviewPanel() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(left: BorderSide(color: Colors.grey[300]!)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.preview, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Aperçu',
+                  style: GoogleFonts.lato(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  Text(
+                    _titleController.text.isEmpty
+                        ? 'Titre de la publication'
+                        : _titleController.text,
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Excerpt
+                  if (_excerptController.text.isNotEmpty)
+                    Text(
+                      _excerptController.text,
+                      style: GoogleFonts.lato(
+                        fontSize: 16,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  const SizedBox(height: 24),
+                  
+                  // Content preview
+                  quill.QuillEditor(
+                    controller: _controller,
+                    focusNode: FocusNode(canRequestFocus: false),
+                    scrollController: ScrollController(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -414,11 +540,6 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
           controller: _controller,
           focusNode: _focusNode,
           scrollController: _scrollController,
-          configurations: quill.QuillEditorConfigurations(
-            padding: const EdgeInsets.symmetric(horizontal: 120, vertical: 60),
-            placeholder: 'Écrivez en plein écran...',
-            embedBuilders: FlutterQuillEmbeds.editorBuilders(),
-          ),
         ),
         
         // Floating toolbar
