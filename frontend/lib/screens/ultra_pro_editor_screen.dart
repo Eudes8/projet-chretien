@@ -249,7 +249,6 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
               child: quill.QuillEditor.basic(
                 configurations: quill.QuillEditorConfigurations(
                   controller: _controller,
-                  readOnly: false,
                   sharedConfigurations: const quill.QuillSharedConfigurations(
                     locale: Locale('fr'),
                   ),
