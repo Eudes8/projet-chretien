@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
+import 'subscription_screen.dart';
+import 'admin/admin_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,6 +22,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<AuthService>(context, listen: false).fetchProfile();
     });
+  }
+
+  void _showComingSoonDialog(String feature) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.info_outline, color: AppTheme.primaryBlue),
+            const SizedBox(width: 12),
+            Text('Bientôt disponible', style: GoogleFonts.playfairDisplay()),
+          ],
+        ),
+        content: Text(
+          '$feature sera disponible dans une prochaine mise à jour.',
+          style: GoogleFonts.lato(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -60,6 +87,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
+    final isPremium = user?['isPremium'] == true;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Mon Profil', style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold)),
@@ -67,7 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // TODO: Settings screen
+              _showComingSoonDialog('Les paramètres');
             },
           ),
         ],
@@ -134,21 +163,105 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: user?['role'] == 'admin' ? Colors.red[50] : Colors.blue[50],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                user?['role'] == 'admin' ? 'Administrateur' : 'Membre',
-                style: TextStyle(
-                  color: user?['role'] == 'admin' ? Colors.red : Colors.blue,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: user?['role'] == 'admin' ? Colors.red[50] : Colors.blue[50],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    user?['role'] == 'admin' ? 'Administrateur' : 'Membre',
+                    style: TextStyle(
+                      color: user?['role'] == 'admin' ? Colors.red : Colors.blue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                if (isPremium) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      gradient: AppTheme.goldGradient,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.star, size: 14, color: Colors.white),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Premium',
+                          style: GoogleFonts.lato(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+
+            // Premium CTA if not premium
+            if (!isPremium) ...[
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: AppTheme.primaryGradient,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    const Icon(Icons.star, color: AppTheme.primaryGold, size: 32),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Passez Premium',
+                      style: GoogleFonts.playfairDisplay(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Accédez à tous les contenus exclusifs',
+                      style: GoogleFonts.lato(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SubscriptionScreen(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryGold,
+                        foregroundColor: AppTheme.primaryBlue,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                      child: Text(
+                        'Découvrir Premium',
+                        style: GoogleFonts.lato(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
+            ],
 
             const SizedBox(height: 48),
 
@@ -156,29 +269,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildMenuItem(
               icon: Icons.person_outline,
               title: 'Modifier le profil',
-              onTap: () {},
+              onTap: () => _showComingSoonDialog('La modification du profil'),
             ),
             _buildMenuItem(
               icon: Icons.notifications_outlined,
               title: 'Notifications',
-              onTap: () {},
+              onTap: () => _showComingSoonDialog('Les notifications'),
             ),
             _buildMenuItem(
               icon: Icons.favorite_border,
               title: 'Mes favoris',
-              onTap: () {},
+              onTap: () => _showComingSoonDialog('Les favoris'),
             ),
             _buildMenuItem(
               icon: Icons.history,
               title: 'Historique de lecture',
-              onTap: () {},
+              onTap: () => _showComingSoonDialog('L\'historique de lecture'),
             ),
             if (user?['role'] == 'admin')
               _buildMenuItem(
                 icon: Icons.admin_panel_settings_outlined,
                 title: 'Administration',
                 onTap: () {
-                  // Navigate to admin dashboard
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AdminScreen()),
+                  );
                 },
               ),
             

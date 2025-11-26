@@ -14,11 +14,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    ModernDashboardScreen(),
-    LibraryScreen(),
-    SearchScreen(),
-    ProfileScreen(),
+  static List<Widget> _widgetOptions(Function(int) onTabChange) => [
+    ModernDashboardScreen(onNavigateToSearch: () => onTabChange(2)),
+    const LibraryScreen(),
+    const SearchScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -30,7 +30,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: _widgetOptions(_onItemTapped).elementAt(_selectedIndex),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: _onItemTapped,
         selectedIndex: _selectedIndex,

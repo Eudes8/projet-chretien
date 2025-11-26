@@ -9,7 +9,9 @@ import '../theme/premium_components.dart';
 import 'reading_screen.dart';
 
 class ModernDashboardScreen extends StatefulWidget {
-  const ModernDashboardScreen({super.key});
+  final VoidCallback? onNavigateToSearch;
+  
+  const ModernDashboardScreen({super.key, this.onNavigateToSearch});
 
   @override
   State<ModernDashboardScreen> createState() => _ModernDashboardScreenState();
@@ -305,8 +307,9 @@ class _ModernDashboardScreenState extends State<ModernDashboardScreen> with Sing
           ),
         ),
         onTap: () {
-          // TODO: Navigate to search screen
+          widget.onNavigateToSearch?.call();
         },
+        readOnly: true,
       ),
     );
   }

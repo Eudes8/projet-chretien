@@ -4,6 +4,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/publication.dart';
+import '../widgets/premium_gate.dart';
 
 enum ThemeModeOption {
   clair,
@@ -123,7 +124,9 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PremiumGate(
+      isPaidContent: widget.publication.estPayant,
+      child: Scaffold(
       backgroundColor: _getBackgroundColor(),
       body: Stack(
         children: [
@@ -229,6 +232,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
           if (_showSettings) _buildSettingsOverlay(),
         ],
       ),
+    ),
     );
   }
 
@@ -554,6 +558,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
     );
   }
 
+  
   @override
   void dispose() {
     flutterTts.stop();

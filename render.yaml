@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: projet-chretien-backend
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: node backend-native/server.js
+    dockerfilePath: Dockerfile
+    autoDeploy: true
