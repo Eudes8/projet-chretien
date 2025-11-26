@@ -55,6 +55,7 @@ dependencies:
 
 dependency_overrides:
   path_provider_foundation: ^2.4.0
+  intl: any
 
 dev_dependencies:
   flutter_test:
