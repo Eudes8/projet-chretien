@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService extends ChangeNotifier {
   String? _token;
@@ -14,6 +15,21 @@ class AuthService extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   final String baseUrl = 'https://projet-chretien.onrender.com';
+
+  Future<bool> tryAutoLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!prefs.containsKey('userData')) return false;
+
+    try {
+      final extractedUserData = json.decode(prefs.getString('userData')!) as Map<String, dynamic>;
+      _token = extractedUserData['token'];
+      _currentUser = extractedUserData['user'];
+      notifyListeners();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   Future<bool> login(String username, String password) async {
     _setLoading(true);
@@ -31,6 +47,7 @@ class AuthService extends ChangeNotifier {
         final data = json.decode(response.body);
         _token = data['token'];
         _currentUser = data['user'];
+        await _saveAuthData();
         notifyListeners();
         return true;
       }
@@ -60,6 +77,7 @@ class AuthService extends ChangeNotifier {
         final data = json.decode(response.body);
         _token = data['token'];
         _currentUser = data['user'];
+        await _saveAuthData();
         notifyListeners();
         return true;
       }
@@ -83,6 +101,7 @@ class AuthService extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         _currentUser = json.decode(response.body);
+        await _saveAuthData(); // Mettre à jour les données locales
         notifyListeners();
       }
     } catch (e) {
@@ -90,10 +109,21 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  void logout() {
+  Future<void> logout() async {
     _token = null;
     _currentUser = null;
     notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('userData');
+  }
+
+  Future<void> _saveAuthData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userData = json.encode({
+      'token': _token,
+      'user': _currentUser,
+    });
+    await prefs.setString('userData', userData);
   }
 
   Map<String, String> getAuthHeaders() {

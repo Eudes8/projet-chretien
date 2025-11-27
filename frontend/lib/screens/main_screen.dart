@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
 import 'modern_dashboard_screen.dart';
 import 'library_screen.dart';
 import 'search_screen.dart';
@@ -13,6 +15,14 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AuthService>(context, listen: false).tryAutoLogin();
+    });
+  }
 
   static List<Widget> _widgetOptions(Function(int) onTabChange) => [
     ModernDashboardScreen(onNavigateToSearch: () => onTabChange(2)),
