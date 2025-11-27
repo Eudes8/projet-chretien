@@ -12,13 +12,33 @@ const Admin = require('./models/Admin');
 const User = require('./models/User');
 const { authenticateToken, JWT_SECRET } = require('./middleware/auth');
 
+// Import nouveaux middleware
+const { logger, httpLogger } = require('./utils/logger');
+const { limiter, authLimiter, securityMiddleware } = require('./middleware/security');
+const { errorHandler, notFound, uncaughtExceptionHandler, unhandledRejectionHandler } = require('./middleware/errorHandler');
+
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
-// Middleware
+// Gestion des erreurs non capturées
+uncaughtExceptionHandler();
+
+// Middleware de sécurité (doit être en premier)
+app.use(securityMiddleware);
+
+// HTTP Request Logging
+app.use(httpLogger);
+
+// CORS et Body Parser
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+
+// Rate limiting global
+app.use(limiter);
+
+// Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Multer configuration for file uploads
@@ -53,7 +73,7 @@ async function init() {
 
 // ---------- AUTH ROUTES ----------
 // Register
-app.post('/auth/register', async (req, res) => {
+app.post('/auth/register', authLimiter, async (req, res) => {
     try {
         const { name, email, password } = req.body;
         const existing = await User.findOne({ where: { email } });
@@ -61,15 +81,16 @@ app.post('/auth/register', async (req, res) => {
         const passwordHash = await bcrypt.hash(password, 10);
         const user = await User.create({ name, email, passwordHash });
         const token = jwt.sign({ id: user.id, email: user.email, role: 'user' }, JWT_SECRET, { expiresIn: '24h' });
+        logger.info(`New user registered: ${email}`);
         res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email, role: 'user' } });
     } catch (e) {
-        console.error('Register error:', e);
+        logger.error('Register error:', e);
         res.status(500).json({ error: e.message });
     }
 });
 
 // Login (admin or user)
-app.post('/auth/login', async (req, res) => {
+app.post('/auth/login', authLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
         // Admin attempt
@@ -248,9 +269,20 @@ app.delete('/users/:id', authenticateToken, async (req, res) => {
     }
 });
 
+// Gestionnaire 404 - doit être après toutes les routes
+app.use(notFound);
+
+// Gestionnaire d'erreurs global - doit être en dernier
+app.use(errorHandler);
+
 // Start server after DB init
 init().then(() => {
-    app.listen(PORT, () => {
-        console.log(`🚀 Server running at http://localhost:${PORT}`);
+    const server = app.listen(PORT, () => {
+        logger.info(`🚀 Veritable Server running at http://localhost:${PORT}`);
+        logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+        logger.info(`🔒 Security middleware active`);
     });
+
+    // Gestion des rejections non gérées
+    unhandledRejectionHandler(server);
 });
