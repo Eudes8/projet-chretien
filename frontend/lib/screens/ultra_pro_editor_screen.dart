@@ -182,9 +182,35 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
           style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold),
         ),
         actions: [
+          // Auto-save indicator
+          if (_isSaving)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else if (_lastSaved != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Center(
+                child: Text(
+                  'Sauvegardé ${_formatTimeSince(_lastSaved!)}',
+                  style: const TextStyle(fontSize: 12, color: Colors.green),
+                ),
+              ),
+            ),
+          IconButton(
+            icon: const Icon(Icons.visibility),
+            onPressed: _showPreviewDialog,
+            tooltip: 'Prévisualiser',
+          ),
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: () => _savePublication(),
+            tooltip: 'Sauvegarder',
           ),
         ],
       ),
@@ -247,11 +273,11 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               child: quill.QuillEditor(
-                controller: _controller,
                 scrollController: _scrollController,
                 focusNode: _focusNode,
-                configurations: const quill.QuillEditorConfigurations(
-                  padding: EdgeInsets.all(16),
+                configurations: quill.QuillEditorConfigurations(
+                  controller: _controller,
+                  padding: const EdgeInsets.all(16),
                   autoFocus: true,
                   expands: false,
                   scrollable: true,
@@ -259,9 +285,126 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
               ),
             ),
           ),
+          
+          // Stats Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              border: Border(top: BorderSide(color: Colors.grey[300]!)),
+            ),
+            child: Row(
+              children: [
+                _buildStatItem(Icons.article, 'Mots: $_wordCount'),
+                const SizedBox(width: 16),
+                _buildStatItem(Icons.text_fields, 'Caractères: $_charCount'),
+                const SizedBox(width: 16),
+                _buildStatItem(Icons.schedule, 'Lecture: ${(_wordCount / 200).ceil()} min'),
+                const Spacer(),
+                if (_autoSaveEnabled)
+                  const Icon(Icons.cloud_done, color: Colors.green, size: 20),
+              ],
+            ),
+          ),
         ],
       ),
     );
+  }
+  
+  Widget _buildStatItem(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Colors.grey[600]),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+        ),
+      ],
+    );
+  }
+  
+  void _showPreviewDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.8,
+          height: MediaQuery.of(context).size.height * 0.8,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Aperçu',
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 16),
+              // Title
+              Text(
+                _titleController.text.isEmpty ? 'Sans titre' : _titleController.text,
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Type badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _isPaid ? Colors.amber[100] : Colors.blue[100],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  _selectedType + (_isPaid ? ' • Premium' : ''),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: _isPaid ? Colors.amber[900] : Colors.blue[900],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Content
+              Expanded(
+                child: SingleChildScrollView(
+                  child: quill.QuillEditor(
+                    scrollController: ScrollController(),
+                    focusNode: FocusNode(canRequestFocus: false),
+                    configurations: quill.QuillEditorConfigurations(
+                      controller: _controller,
+                      readOnly: true,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  String _formatTimeSince(DateTime time) {
+    final diff = DateTime.now().difference(time);
+    if (diff.inSeconds < 60) return 'à l\'instant';
+    if (diff.inMinutes < 60) return 'il y a ${diff.inMinutes} min';
+    if (diff.inHours < 24) return 'il y a ${diff.inHours}h';
+    return 'il y a ${diff.inDays}j';
   }
 
   @override
