@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Veritable Release APK
 
 on:
   push:
@@ -31,22 +31,23 @@ jobs:
       working-directory: ./frontend
       run: flutter pub get
       
-    - name: Build APK Debug
+    - name: Build Optimized Release APK
       working-directory: ./frontend
-      run: flutter build apk --debug
-      
-    - name: Build APK Release
-      working-directory: ./frontend
-      run: flutter build apk --release --split-per-abi
-      
-    - name: Upload Debug APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-debug
-        path: frontend/build/app/outputs/flutter-apk/app-debug.apk
+      run: |
+        flutter build apk --release \
+          --split-per-abi \
+          --obfuscate \
+          --split-debug-info=build/app/outputs/symbols \
+          --target-platform android-arm64
         
-    - name: Upload Release APKs
+    - name: Upload Release APK (ARM64)
       uses: actions/upload-artifact@v4
       with:
-        name: app-release
-        path: frontend/build/app/outputs/flutter-apk/app-*-release.apk
+        name: veritable-release-arm64
+        path: frontend/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+        
+    - name: Upload Debug Symbols
+      uses: actions/upload-artifact@v4
+      with:
+        name: debug-symbols
+        path: frontend/build/app/outputs/symbols/
