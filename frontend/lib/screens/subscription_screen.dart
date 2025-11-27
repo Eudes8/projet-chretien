@@ -106,7 +106,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       Icon(
                         Icons.star,
                         size: 80,
-                        color: AppTheme.primaryGold,
+                        color: AppTheme.primaryOrange,
                       ),
                       const SizedBox(height: 24),
                       Text(
@@ -198,7 +198,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: AppTheme.primaryGold, size: 24),
+            child: Icon(icon, color: AppTheme.primaryOrange, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -228,7 +228,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               : Colors.white.withOpacity(0.1),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppTheme.primaryGold : Colors.transparent,
+            color: isSelected ? AppTheme.primaryOrange : Colors.transparent,
             width: 2,
           ),
         ),
@@ -300,7 +300,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryGold,
+                    color: AppTheme.primaryOrange,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

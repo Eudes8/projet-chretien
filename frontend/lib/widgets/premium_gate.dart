@@ -52,7 +52,7 @@ class PremiumGate extends StatelessWidget {
                     child: const Icon(
                       Icons.lock_outline,
                       size: 80,
-                      color: AppTheme.primaryGold,
+                      color: AppTheme.primaryOrange,
                     ),
                   ),
                   const SizedBox(height: 32),

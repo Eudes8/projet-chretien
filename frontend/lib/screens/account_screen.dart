@@ -25,7 +25,7 @@ class _AccountScreenState extends State<AccountScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Mode Administrateur Activé !'),
-            backgroundColor: AppTheme.primaryGold,
+            backgroundColor: AppTheme.primaryOrange,
             duration: Duration(seconds: 2),
           ),
         );

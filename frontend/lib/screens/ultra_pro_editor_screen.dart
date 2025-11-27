@@ -247,8 +247,29 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
                       const SizedBox(width: 8),
                       Switch(value: _isPaid, onChanged: (v) => setState(() => _isPaid = v)),
                       const Text('Payant'),
+                      const SizedBox(width: 16),
+                      IconButton(
+                        icon: Icon(
+                          Icons.image,
+                          color: _coverImage != null || _existingCoverImageUrl != null 
+                              ? Colors.green 
+                              : Colors.grey,
+                        ),
+                        onPressed: _pickCoverImage,
+                        tooltip: 'Image de couverture',
+                      ),
                     ],
                   ),
+                  if (_coverImage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        'Image sélectionnée: ${_coverImage!.name}',
+                        style: const TextStyle(fontSize: 12, color: Colors.green),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -387,7 +408,6 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
                     focusNode: FocusNode(canRequestFocus: false),
                     configurations: quill.QuillEditorConfigurations(
                       controller: _controller,
-                      readOnly: true,
                     ),
                   ),
                 ),
@@ -405,6 +425,89 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
     if (diff.inMinutes < 60) return 'il y a ${diff.inMinutes} min';
     if (diff.inHours < 24) return 'il y a ${diff.inHours}h';
     return 'il y a ${diff.inDays}j';
+  }
+
+  Future<void> _savePublication() async {
+    if (_titleController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Le titre est requis')),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      final contentJson = jsonEncode(_controller.document.toDelta().toJson());
+      final plainText = _controller.document.toPlainText();
+      final excerpt = _excerptController.text.isNotEmpty 
+          ? _excerptController.text 
+          : (plainText.length > 100 ? plainText.substring(0, 100) + '...' : plainText);
+
+      String? coverImageBase64;
+      if (_coverImage != null) {
+        final bytes = await _coverImage!.readAsBytes();
+        coverImageBase64 = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+      } else {
+        coverImageBase64 = _existingCoverImageUrl;
+      }
+
+      final publicationData = {
+        'title': _titleController.text,
+        'content': contentJson,
+        'excerpt': excerpt,
+        'type': _selectedType,
+        'isPaid': _isPaid,
+        'coverImage': coverImageBase64,
+      };
+
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final headers = authService.getAuthHeaders();
+      headers['Content-Type'] = 'application/json';
+
+      http.Response response;
+      if (widget.publicationId != null) {
+        // Update
+        response = await http.put(
+          Uri.parse('$baseUrl/publications/${widget.publicationId}'),
+          headers: headers,
+          body: jsonEncode(publicationData),
+        );
+      } else {
+        // Create
+        response = await http.post(
+          Uri.parse('$baseUrl/publications'),
+          headers: headers,
+          body: jsonEncode(publicationData),
+        );
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        setState(() {
+          _lastSaved = DateTime.now();
+          _isSaving = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Publication sauvegardée avec succès')),
+        );
+        // Si c'est une nouvelle publication, on peut vouloir rester ou sortir
+        // Pour l'instant on reste pour permettre de continuer l'édition
+      } else {
+        throw Exception('Erreur ${response.statusCode}: ${response.body}');
+      }
+    } catch (e) {
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur de sauvegarde: $e')),
+      );
+    }
+  }
+
+  void _autoSave() {
+    // Auto-save silencieux si le titre est présent
+    if (_titleController.text.isNotEmpty && !_isSaving) {
+        _savePublication();
+    }
   }
 
   @override

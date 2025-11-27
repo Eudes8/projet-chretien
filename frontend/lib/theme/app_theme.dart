@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Colors - Royal Premium Palette
-  static const Color primaryBlue = Color(0xFF1A237E);
-  static const Color primaryGold = Color(0xFFFFD700);
-  static const Color accentPurple = Color(0xFF6A1B9A);
+  // Colors - Orange & Blue Palette
+  static const Color primaryBlue = Color(0xFF1565C0); // Blue 800
+  static const Color primaryOrange = Color(0xFFEF6C00); // Orange 800
+  static const Color accentOrange = Color(0xFFFF9800); // Orange 500
   static const Color backgroundLight = Color(0xFFF8F9FA);
   static const Color backgroundDark = Color(0xFF121212);
   static const Color cardLight = Colors.white;
@@ -15,13 +15,13 @@ class AppTheme {
   
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primaryBlue, accentPurple],
+    colors: [primaryBlue, Color(0xFF0D47A1)], // Blue 800 -> Blue 900
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   
-  static const LinearGradient goldGradient = LinearGradient(
-    colors: [Color(0xFFFFD700), Color(0xFFFFA000)],
+  static const LinearGradient orangeGradient = LinearGradient(
+    colors: [primaryOrange, accentOrange],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -64,7 +64,7 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: primaryBlue,
         primary: primaryBlue,
-        secondary: primaryGold,
+        secondary: primaryOrange,
         surface: cardLight,
         background: backgroundLight,
         brightness: Brightness.light,
@@ -220,7 +220,7 @@ class AppTheme {
       brightness: Brightness.dark,
       colorScheme: ColorScheme.fromSeed(
         seedColor: primaryBlue,
-        primary: primaryGold,
+        primary: primaryOrange,
         secondary: primaryBlue,
         surface: cardDark,
         background: backgroundDark,

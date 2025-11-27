@@ -280,7 +280,7 @@ class _PublicationEditorScreenState extends State<PublicationEditorScreen> {
                         subtitle: const Text('Nécessite un abonnement pour accéder'),
                         value: _estPayant,
                         onChanged: (val) => setState(() => _estPayant = val),
-                        activeColor: AppTheme.primaryGold,
+                        activeColor: AppTheme.primaryOrange,
                       ),
                     ),
                     

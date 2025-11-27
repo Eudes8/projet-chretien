@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../theme/premium_components.dart';
 import 'reading_screen.dart';
+import '../services/verse_service.dart';
 
 class ModernDashboardScreen extends StatefulWidget {
   final VoidCallback? onNavigateToSearch;
@@ -19,6 +20,8 @@ class ModernDashboardScreen extends StatefulWidget {
 
 class _ModernDashboardScreenState extends State<ModernDashboardScreen> with SingleTickerProviderStateMixin {
   final PublicationService _service = PublicationService();
+  final VerseService _verseService = VerseService();
+  late Verse _verseOfTheDay;
   late Future<List<Publication>> _publicationsFuture;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -29,6 +32,7 @@ class _ModernDashboardScreenState extends State<ModernDashboardScreen> with Sing
   @override
   void initState() {
     super.initState();
+    _verseOfTheDay = _verseService.getVerseOfTheDay();
     _publicationsFuture = _service.getPublications();
     
     _animationController = AnimationController(
@@ -233,12 +237,12 @@ class _ModernDashboardScreenState extends State<ModernDashboardScreen> with Sing
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.format_quote, color: AppTheme.primaryGold, size: 20),
+                            const Icon(Icons.format_quote, color: AppTheme.primaryOrange, size: 20),
                             const SizedBox(width: 8),
                             Text(
                               'VERSET DU JOUR',
                               style: GoogleFonts.lato(
-                                color: AppTheme.primaryGold,
+                                color: AppTheme.primaryOrange,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 10,
                                 letterSpacing: 1.5,
@@ -248,7 +252,7 @@ class _ModernDashboardScreenState extends State<ModernDashboardScreen> with Sing
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '"Car je connais les projets que j\'ai formés sur vous, dit l\'Éternel, projets de paix et non de malheur..."',
+                          '"${_verseOfTheDay.text}"',
                           style: GoogleFonts.playfairDisplay(
                             color: Colors.white,
                             fontSize: 16,
@@ -259,7 +263,7 @@ class _ModernDashboardScreenState extends State<ModernDashboardScreen> with Sing
                         Align(
                           alignment: Alignment.centerRight,
                           child: Text(
-                            'Jérémie 29:11',
+                            _verseOfTheDay.reference,
                             style: GoogleFonts.lato(
                               color: Colors.white.withOpacity(0.8),
                               fontSize: 12,
@@ -467,13 +471,13 @@ class _ModernDashboardScreenState extends State<ModernDashboardScreen> with Sing
                             Container(
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryGold.withOpacity(0.1),
+                                color: AppTheme.primaryOrange.withOpacity(0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
                                 Icons.star,
                                 size: 12,
-                                color: AppTheme.primaryGold,
+                                color: AppTheme.primaryOrange,
                               ),
                             ),
                           const Spacer(),

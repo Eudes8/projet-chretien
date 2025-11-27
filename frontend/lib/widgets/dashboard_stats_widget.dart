@@ -25,14 +25,14 @@ class DashboardStatsWidget extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             AppTheme.primaryBlue.withOpacity(0.1),
-            AppTheme.primaryGold.withOpacity(0.1),
+            AppTheme.primaryOrange.withOpacity(0.1),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppTheme.primaryGold.withOpacity(0.3),
+          color: AppTheme.primaryOrange.withOpacity(0.3),
           width: 1,
         ),
       ),
@@ -76,7 +76,7 @@ class DashboardStatsWidget extends StatelessWidget {
                   icon: Icons.visibility_outlined,
                   label: 'Plus lu',
                   value: mostReadCount.toString(),
-                  color: AppTheme.primaryGold,
+                  color: AppTheme.primaryOrange,
                 ),
               ),
             ],
@@ -117,10 +117,10 @@ class DashboardStatsWidget extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.primaryGold.withOpacity(0.1),
+                color: AppTheme.primaryOrange.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppTheme.primaryGold.withOpacity(0.3),
+                  color: AppTheme.primaryOrange.withOpacity(0.3),
                 ),
               ),
               child: Row(
@@ -128,7 +128,7 @@ class DashboardStatsWidget extends StatelessWidget {
                   Icon(
                     Icons.star,
                     size: 16,
-                    color: AppTheme.primaryGold,
+                    color: AppTheme.primaryOrange,
                   ),
                   const SizedBox(width: 8),
                   Expanded(

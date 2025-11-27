@@ -80,7 +80,7 @@ class AdminLayout extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.admin_panel_settings, size: 48, color: AppTheme.primaryGold),
+                const Icon(Icons.admin_panel_settings, size: 48, color: AppTheme.primaryOrange),
                 const SizedBox(height: 16),
                 Text(
                   'BACK OFFICE',
@@ -115,7 +115,7 @@ class AdminLayout extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           decoration: BoxDecoration(
             border: isSelected
-                ? const Border(left: BorderSide(color: AppTheme.primaryGold, width: 4))
+                ? const Border(left: BorderSide(color: AppTheme.primaryOrange, width: 4))
                 : null,
             color: isSelected ? Colors.white.withOpacity(0.1) : Colors.transparent,
           ),
@@ -123,7 +123,7 @@ class AdminLayout extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: isDestructive ? Colors.redAccent : (isSelected ? AppTheme.primaryGold : Colors.white70),
+                color: isDestructive ? Colors.redAccent : (isSelected ? AppTheme.primaryOrange : Colors.white70),
                 size: 22,
               ),
               const SizedBox(width: 16),

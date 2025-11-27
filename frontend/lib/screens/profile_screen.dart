@@ -186,7 +186,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      gradient: AppTheme.goldGradient,
+                      gradient: AppTheme.orangeGradient,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -219,7 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Column(
                   children: [
-                    const Icon(Icons.star, color: AppTheme.primaryGold, size: 32),
+                    const Icon(Icons.star, color: AppTheme.primaryOrange, size: 32),
                     const SizedBox(height: 8),
                     Text(
                       'Passez Premium',
@@ -249,7 +249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryGold,
+                        backgroundColor: AppTheme.primaryOrange,
                         foregroundColor: AppTheme.primaryBlue,
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),
