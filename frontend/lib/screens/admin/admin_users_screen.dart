@@ -27,7 +27,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     final authService = Provider.of<AuthService>(context, listen: false);
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.1.8:3000/users'),
+        Uri.parse('https://projet-chretien.onrender.com/users'),
         headers: authService.getAuthHeaders(),
       );
       if (response.statusCode == 200) {
@@ -63,7 +63,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
       final authService = Provider.of<AuthService>(context, listen: false);
       try {
         final response = await http.delete(
-          Uri.parse('http://192.168.1.8:3000/users/$id'),
+          Uri.parse('https://projet-chretien.onrender.com/users/$id'),
           headers: authService.getAuthHeaders(),
         );
         if (response.statusCode == 200) {
