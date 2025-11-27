@@ -402,7 +402,7 @@ class _ModernDashboardScreenState extends State<ModernDashboardScreen> with Sing
                     gradient: LinearGradient(
                       colors: [
                         AppTheme.primaryBlue.withOpacity(0.8),
-                        AppTheme.accentPurple.withOpacity(0.8),
+                        AppTheme.accentOrange.withOpacity(0.8),
                       ],
                     ),
                   ),
@@ -542,7 +542,7 @@ class _ModernDashboardScreenState extends State<ModernDashboardScreen> with Sing
       case 'Livret':
         return const Color(0xFF2196F3);
       case 'Livre':
-        return AppTheme.accentPurple;
+        return AppTheme.accentOrange;
       default:
         return AppTheme.textSecondary;
     }

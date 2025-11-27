@@ -101,69 +101,7 @@ class _UltraProEditorScreenState extends State<UltraProEditorScreen> {
     });
   }
 
-  Future<void> _autoSave() async {
-    if (!_isSaving && widget.publicationId != null) {
-      await _savePublication(showMessage: false);
-    }
-  }
 
-  Future<void> _savePublication({bool showMessage = true}) async {
-    setState(() => _isSaving = true);
-    
-    try {
-      final authService = Provider.of<AuthService>(context, listen: false);
-      final headers = authService.getAuthHeaders();
-      
-      final content = jsonEncode(_controller.document.toDelta().toJson());
-      
-      var request = http.MultipartRequest(
-        widget.publicationId == null ? 'POST' : 'PUT',
-        Uri.parse('$baseUrl/publications${widget.publicationId == null ? '' : '/${widget.publicationId}'}'),
-      );
-      
-      request.headers.addAll(headers);
-      request.fields['titre'] = _titleController.text;
-      request.fields['contenuPrincipal'] = content;
-      request.fields['extrait'] = _excerptController.text;
-      request.fields['type'] = _selectedType;
-      request.fields['estPayant'] = _isPaid.toString();
-      if (_existingCoverImageUrl != null) {
-        request.fields['imageUrl'] = _existingCoverImageUrl!;
-      }
-      
-      if (_coverImage != null) {
-        request.files.add(await http.MultipartFile.fromPath('coverImage', _coverImage!.path));
-      }
-
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        setState(() => _lastSaved = DateTime.now());
-        if (showMessage && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Publication sauvegardée'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } else {
-        throw Exception('Erreur serveur: ${response.statusCode}');
-      }
-    } catch (e) {
-      if (showMessage && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Erreur: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      setState(() => _isSaving = false);
-    }
-  }
 
   Future<void> _pickCoverImage() async {
     final ImagePicker picker = ImagePicker();

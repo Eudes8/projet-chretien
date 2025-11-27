@@ -150,7 +150,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                   gradient: LinearGradient(
                     colors: [
                       AppTheme.primaryBlue.withOpacity(0.8),
-                      AppTheme.accentPurple.withOpacity(0.8),
+                      AppTheme.accentOrange.withOpacity(0.8),
                     ],
                   ),
                 ),
