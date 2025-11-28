@@ -11,7 +11,7 @@ import '../models/publication.dart';
 import '../theme/app_theme.dart';
 
 enum ReadingTheme { light, sepia, dark }
-enum FontStyle { serif, sansSerif, mono }
+enum ReaderFontStyle { serif, sansSerif, mono }
 
 class UltraProReaderScreen extends StatefulWidget {
   final Publication publication;
@@ -37,7 +37,7 @@ class _UltraProReaderScreenState extends State<UltraProReaderScreen>
 
   // Reading Settings
   ReadingTheme _theme = ReadingTheme.sepia;
-  FontStyle _fontStyle = FontStyle.serif;
+  ReaderFontStyle _fontStyle = ReaderFontStyle.serif;
   double _fontSize = 18.0;
   double _lineHeight = 1.6;
   double _letterSpacing = 0.5;
@@ -192,6 +192,100 @@ class _UltraProReaderScreenState extends State<UltraProReaderScreen>
       await _tts.stop();
     } else {
       final text = _quillController.document.toPlainText();
+      await _tts.setSpeechRate(_speechRate);
+      await _tts.setPitch(_pitch);
+      await _tts.speak(text);
+    }
+  }
+
+  Color get _backgroundColor {
+    switch (_theme) {
+      case ReadingTheme.light:
+        return Colors.white;
+      case ReadingTheme.sepia:
+        return const Color(0xFFF4ECD8);
+      case ReadingTheme.dark:
+        return const Color(0xFF1A1A1A);
+    }
+  }
+
+  Color get _textColor {
+    switch (_theme) {
+      case ReadingTheme.light:
+        return Colors.black87;
+      case ReadingTheme.sepia:
+        return const Color(0xFF5F4B32);
+      case ReadingTheme.dark:
+        return const Color(0xFFE0E0E0);
+    }
+  }
+
+  TextStyle get _textStyle {
+    String fontFamily;
+    switch (_fontStyle) {
+      case ReaderFontStyle.serif:
+        fontFamily = 'Libre Baskerville';
+        break;
+      case ReaderFontStyle.sansSerif:
+        fontFamily = 'Inter';
+        break;
+      case ReaderFontStyle.mono:
+        fontFamily = 'Courier';
+        break;
+    }
+
+    return GoogleFonts.getFont(
+      fontFamily,
+      fontSize: _fontSize,
+      height: _lineHeight,
+      letterSpacing: _letterSpacing,
+      color: _textColor,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _backgroundColor,
+      body: Stack(
+        children: [
+          // Main Content
+          GestureDetector(
+            onTap: _toggleControls,
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // Progress Bar
+                  if (_showControls)
+                    FadeTransition(
+                      opacity: _controlsAnimation,
+                      child: _buildProgressBar(),
+                    ),
+                  
+                  // Reading Content
+                  Expanded(
+                    child: Opacity(
+                      opacity: _brightness,
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: _isFullscreen ? 24 : 16,
+                          vertical: 24,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title
+                            Text(
+                              widget.publication.titre,
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: _fontSize + 8,
+                                fontWeight: FontWeight.bold,
+                                color: _textColor,
+                                height: 1.3,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
                             
                             // Metadata
                             Row(
@@ -239,7 +333,6 @@ class _UltraProReaderScreenState extends State<UltraProReaderScreen>
                               child: QuillEditor.basic(
                                 configurations: QuillEditorConfigurations(
                                   controller: _quillController,
-                                  readOnly: true,
                                   showCursor: false,
                                   padding: EdgeInsets.zero,
                                 ),
@@ -504,11 +597,11 @@ class _UltraProReaderScreenState extends State<UltraProReaderScreen>
               'Police',
               Row(
                 children: [
-                  _buildFontButton(FontStyle.serif, 'Serif'),
+                  _buildFontButton(ReaderFontStyle.serif, 'Serif'),
                   const SizedBox(width: 12),
-                  _buildFontButton(FontStyle.sansSerif, 'Sans-Serif'),
+                  _buildFontButton(ReaderFontStyle.sansSerif, 'Sans-Serif'),
                   const SizedBox(width: 12),
-                  _buildFontButton(FontStyle.mono, 'Mono'),
+                  _buildFontButton(ReaderFontStyle.mono, 'Mono'),
                 ],
               ),
             ),
@@ -660,7 +753,7 @@ class _UltraProReaderScreenState extends State<UltraProReaderScreen>
     );
   }
 
-  Widget _buildFontButton(FontStyle style, String label) {
+  Widget _buildFontButton(ReaderFontStyle style, String label) {
     final isSelected = _fontStyle == style;
     return Expanded(
       child: InkWell(
