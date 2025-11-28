@@ -1,6 +1,6 @@
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const mongoSanitize = require('express-mongo-sanitize');
+// const mongoSanitize = require('express-mongo-sanitize'); // Désactivé temporairement - cause erreur 500
 const xss = require('xss-clean');
 
 // Rate limiting pour prévenir les attaques DDoS
@@ -26,7 +26,7 @@ const securityMiddleware = [
         contentSecurityPolicy: false, // Désactivé pour permettre le chargement de ressources
         crossOriginEmbedderPolicy: false,
     }),
-    mongoSanitize(), // Prévient les injections NoSQL
+    // mongoSanitize(), // DÉSACTIVÉ - Incompatible avec Node.js récent (erreur: Cannot set property query)
     xss(), // Prévient les attaques XSS
 ];
 
