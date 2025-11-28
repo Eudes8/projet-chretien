@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/publication.dart';
 import '../services/publication_service.dart';
-import 'reading_screen.dart';
+import 'ultra_pro_reader_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -58,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ReadingScreen(publication: featured),
+                          builder: (context) => UltraProReaderScreen(publication: featured),
                         ),
                       );
                     },

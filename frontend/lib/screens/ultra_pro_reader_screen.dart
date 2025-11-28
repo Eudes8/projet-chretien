@@ -6,6 +6,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/publication.dart';
 import '../theme/app_theme.dart';
 
@@ -484,9 +485,7 @@ class _UltraProReaderScreenState extends State<UltraProReaderScreen>
             _buildControlButton(
               icon: Icons.bookmark_border,
               label: 'Marque-page',
-              onPressed: () {
-                // TODO: Implement bookmarks
-              },
+              onPressed: _saveBookmark,
             ),
             _buildControlButton(
               icon: Icons.text_fields,
@@ -499,9 +498,7 @@ class _UltraProReaderScreenState extends State<UltraProReaderScreen>
             _buildControlButton(
               icon: Icons.share,
               label: 'Partager',
-              onPressed: () {
-                // TODO: Implement share
-              },
+              onPressed: _sharePublication,
             ),
           ],
         ),
@@ -794,6 +791,66 @@ class _UltraProReaderScreenState extends State<UltraProReaderScreen>
     final text = _quillController.document.toPlainText();
     final wordCount = text.split(RegExp(r'\s+')).length;
     return (wordCount / 200).ceil(); // 200 words per minute
+  }
+
+  Future<void> _saveBookmark() async {
+    final prefs = await SharedPreferences.getInstance();
+    final bookmarksKey = 'bookmarks_${widget.publication.id}';
+    
+    // Sauvegarder la position actuelle comme marque-page
+    final bookmark = {
+      'position': _readingProgress,
+      'timestamp': DateTime.now().toIso8601String(),
+      'page': _currentPage,
+    };
+    
+    await prefs.setString(bookmarksKey, jsonEncode(bookmark));
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.bookmark, color: AppTheme.primaryOrange),
+              const SizedBox(width: 8),
+              const Text('Marque-page enregistré'),
+            ],
+          ),
+          backgroundColor: _backgroundColor,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _sharePublication() async {
+    final text = '''
+📖 ${widget.publication.titre}
+
+${widget.publication.extrait ?? 'Découvrez ce contenu sur Veritable'}
+
+Type: ${widget.publication.type}
+Temps de lecture: ${_estimateReadingTime()} minutes
+
+Partagé depuis l'app Veritable 🧡💙
+''';
+
+    try {
+      await Share.share(
+        text,
+        subject: widget.publication.titre,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur de partage: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override

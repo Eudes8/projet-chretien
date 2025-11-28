@@ -6,7 +6,7 @@ import '../theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../theme/premium_components.dart';
-import 'reading_screen.dart';
+import 'ultra_pro_reader_screen.dart';
 import '../services/verse_service.dart';
 
 class ModernDashboardScreen extends StatefulWidget {
@@ -378,7 +378,7 @@ class _ModernDashboardScreenState extends State<ModernDashboardScreen> with Sing
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ReadingScreen(publication: publication),
+              builder: (context) => UltraProReaderScreen(publication: publication),
             ),
           );
         },

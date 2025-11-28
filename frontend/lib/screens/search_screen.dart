@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../models/publication.dart';
 import '../services/publication_service.dart';
 import '../theme/app_theme.dart';
-import 'reading_screen.dart';
+import 'ultra_pro_reader_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -137,7 +137,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => ReadingScreen(publication: publication),
+                                          builder: (context) => UltraProReaderScreen(publication: publication),
                                         ),
                                       );
                                     },
