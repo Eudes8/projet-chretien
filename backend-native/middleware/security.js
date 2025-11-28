@@ -1,7 +1,7 @@
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 // const mongoSanitize = require('express-mongo-sanitize'); // Désactivé temporairement - cause erreur 500
-const xss = require('xss-clean');
+// const xss = require('xss-clean'); // Désactivé temporairement - cause erreur 500 avec Node.js 18+
 
 // Rate limiting pour prévenir les attaques DDoS
 const limiter = rateLimit({
@@ -21,13 +21,15 @@ const authLimiter = rateLimit({
 });
 
 // Middleware de sécurité global
+// Note: mongoSanitize et xss-clean sont désactivés car incompatibles avec Node.js 18+
+// La protection XSS est assurée par Helmet, et la validation par express-validator
 const securityMiddleware = [
     helmet({
         contentSecurityPolicy: false, // Désactivé pour permettre le chargement de ressources
         crossOriginEmbedderPolicy: false,
     }),
-    // mongoSanitize(), // DÉSACTIVÉ - Incompatible avec Node.js récent (erreur: Cannot set property query)
-    xss(), // Prévient les attaques XSS
+    // mongoSanitize(), // DÉSACTIVÉ - Incompatible avec Node.js récent
+    // xss(), // DÉSACTIVÉ - Incompatible avec Node.js récent (erreur: Cannot set property query)
 ];
 
 module.exports = {
